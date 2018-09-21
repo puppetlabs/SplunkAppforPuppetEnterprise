@@ -1,0 +1,190 @@
+<form>
+  <label>Inspect Overview</label>
+  <description>View the latest run status for each node and focus on areas in need of attention.</description>
+  <fieldset submitButton="false">
+    <input type="time" token="time_overview" searchWhenChanged="true">
+      <label>Time Period</label>
+      <default>
+        <earliest>-60m@m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="pe_link" searchWhenChanged="true">
+      <label>Puppet Enterprise Master</label>
+      <choice value="*">ALL</choice>
+      <prefix>source="</prefix>
+      <suffix>"</suffix>
+      <fieldForLabel>source</fieldForLabel>
+      <fieldForValue>source</fieldForValue>
+      <search>
+        <query>sourcetype="pe:status:overview" | table source | dedup source</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+      <default>*</default>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <title>Nodes Reported Up</title>
+        <search>
+          <query>sourcetype="pe:overview:enforcement" $pe_link$
+| eval pe_link = mvindex(split(source,":"),1)
+| stats distinct_count(certname)</query>
+          <earliest>$time_overview.earliest$</earliest>
+          <latest>$time_overview.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Nodes Reported Down</title>
+        <search>
+          <query>sourcetype="pe:overview:enforcement" $pe_link$ |dedup certname  
+| eval last_report_time=strptime(report_timestamp,"%Y-%m-%dT%H:%M:%S.%3N%Z")
+| eval age = (now() - last_report_time)
+| eval status = case(age &gt; 5000, "1", age &lt; 3790, "0")
+| stats sum(status) | rename count(status) as Status</query>
+          <earliest>$time_overview.earliest$</earliest>
+          <latest>$time_overview.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <title>Node Runs in Enforcement</title>
+        <search>
+          <query>sourcetype="pe:overview:enforcement" $pe_link$ | stats distinct_count(certname)</query>
+          <earliest>$time_overview.earliest$</earliest>
+          <latest>$time_overview.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Node run in no-op</title>
+        <search>
+          <query>sourcetype="pe:overview:enforcement" $pe_link$ latest_report_noop=true | stats distinct_count(certname)</query>
+          <earliest>$time_overview.earliest$</earliest>
+          <latest>$time_overview.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <title>with Intentional Changes</title>
+        <search>
+          <query>sourcetype="pe:overview:enforcement" $pe_link$ latest_report_status=changed | stats distinct_count(certname)</query>
+          <earliest>$time_overview.earliest$</earliest>
+          <latest>$time_overview.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>would have Intentional Changes</title>
+        <search>
+          <query>sourcetype="pe:overview:enforcement" $pe_link$ latest_report_status=changed latest_report_noop=true | stats distinct_count(certname)</query>
+          <earliest>$time_overview.earliest$</earliest>
+          <latest>$time_overview.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <title>with Corrective Change</title>
+        <search>
+          <query>sourcetype="pe:overview:enforcement" $pe_link$ latest_report_corrective_change=true | stats distinct_count(certname)</query>
+          <earliest>$time_overview.earliest$</earliest>
+          <latest>$time_overview.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>would have Corrective Change</title>
+        <search>
+          <query>sourcetype="pe:overview:enforcement" $pe_link$ latest_report_noop=true latest_report_corrective_change=true | stats distinct_count(certname)</query>
+          <earliest>$time_overview.earliest$</earliest>
+          <latest>$time_overview.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <title>Unchanged</title>
+        <search>
+          <query>sourcetype="pe:overview:enforcement" $pe_link$ latest_report_status=unchanged | stats distinct_count(certname)</query>
+          <earliest>$time_overview.earliest$</earliest>
+          <latest>$time_overview.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>would be Unchanged</title>
+        <search>
+          <query>sourcetype="pe:overview:enforcement" $pe_link$ latest_report_noop=true latest_report_status=unchanged | stats distinct_count(certname)</query>
+          <earliest>$time_overview.earliest$</earliest>
+          <latest>$time_overview.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <title>with Failures</title>
+        <search>
+          <query>sourcetype="pe:overview:enforcement" $pe_link$ latest_report_status=failed | stats distinct_count(certname)</query>
+          <earliest>$time_overview.earliest$</earliest>
+          <latest>$time_overview.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>with Failures</title>
+        <search>
+          <query>sourcetype="pe:overview:enforcement" $pe_link$ latest_report_noop=true latest_report_status=failed | stats distinct_count(certname)</query>
+          <earliest>$time_overview.earliest$</earliest>
+          <latest>$time_overview.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+</form>
