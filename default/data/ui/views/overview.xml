@@ -1,16 +1,16 @@
 <form>
   <label>Inspect Overview</label>
-  <description>View the latest run status for each node and focus on areas in need of attention.</description>
+  <description>View the latest run status for each node and focus on areas in need of attention</description>
   <fieldset submitButton="false">
     <input type="time" token="time_overview" searchWhenChanged="true">
-      <label>Time Period</label>
+      <label>Time range:</label>
       <default>
         <earliest>-60m@m</earliest>
         <latest>now</latest>
       </default>
     </input>
     <input type="dropdown" token="pe_link" searchWhenChanged="true">
-      <label>Puppet Enterprise Master</label>
+      <label>Puppet Enterprise server:</label>
       <choice value="*">ALL</choice>
       <prefix>source="</prefix>
       <suffix>"</suffix>

@@ -1,16 +1,16 @@
 <form>
   <label>Extended Details</label>
-  <description>Extended Details for Configuration Runs</description>
+  <description>Extended details for configuration runs</description>
   <fieldset submitButton="false">
     <input type="time" token="Time" searchWhenChanged="true">
-      <label>Time</label>
+      <label>Time range:</label>
       <default>
         <earliest>-60m@m</earliest>
         <latest>now</latest>
       </default>
     </input>
     <input type="dropdown" searchWhenChanged="true" token="pe_link">
-      <label>Puppet Enterprise Server</label>
+      <label>Puppet Enterprise server:</label>
       <choice value="*">ALL</choice>
       <default>*</default>
       <prefix>source="</prefix>
@@ -26,7 +26,7 @@
       </search>
     </input>
     <input type="dropdown" token="node" searchWhenChanged="true">
-      <label>Node</label>
+      <label>Node:</label>
       <choice value="*">ALL</choice>
       <default>*</default>
       <prefix>certname="</prefix>
@@ -43,7 +43,7 @@
       </search>
     </input>
     <input type="dropdown" token="Env" searchWhenChanged="true">
-      <label>Environment</label>
+      <label>Puppet environment:</label>
       <choice value="*">ALL</choice>
       <default>*</default>
       <prefix>environment="</prefix>
@@ -60,7 +60,7 @@
       </search>
     </input>
     <input type="dropdown" token="class" searchWhenChanged="true">
-      <label>Class</label>
+      <label>Class:</label>
       <choice value="*">ALL</choice>
       <default>*</default>
       <prefix>containing_class="</prefix>

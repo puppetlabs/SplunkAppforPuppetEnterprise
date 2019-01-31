@@ -1,3 +1,11 @@
-<nav color="#000000">
-  <view name="home" default="true" label="Home" />
+<nav>
+  <view name="puppet_enterprise__overview" default="true" label="Puppet System Overview" />
+  <view name="overview" default="true" label="Puppet Enterprise Overview" />
+  <view name="puppet_enterprise__facts" default="true" label="Puppet Facts" />
+  <view name="puppet_enterprise__extended_details" default="true" label="Extended Details" />
+  <collection label="Documentation">
+    <!--   <view name="data_source" /> -->
+    <a target="_blank" href="https://github.com/puppetlabs/SplunkAppforPuppetEnterprise/blob/master/README.md">Install and usage documentation</a>
+    <a target="_blank" href="https://github.com/puppetlabs/SplunkAppforPuppetEnterprise/issues">Ask a question</a>
+  </collection>
 </nav>

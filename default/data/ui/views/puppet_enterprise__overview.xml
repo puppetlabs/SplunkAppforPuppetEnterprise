@@ -2,7 +2,7 @@
   <label>System Overview</label>
   <fieldset submitButton="false">
     <input type="dropdown" token="pe_link" searchWhenChanged="true">
-      <label>Puppet Enterprise Master</label>
+      <label>Puppet Enterprise server:</label>
       <choice value="*">ALL</choice>
       <default>*</default>
       <prefix>source="</prefix>
