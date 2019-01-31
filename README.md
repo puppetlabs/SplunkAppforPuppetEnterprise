@@ -1,5 +1,7 @@
 # Splunk App for Puppet Enterprise
 
+The Splunk App for Puppet Enterprise visualizes data from Puppet Enterprise.
+
 ## Requirements to run this app
 
 - Splunk Enterprise 7.0+
@@ -8,14 +10,15 @@
 
 ### Installation steps
 
-[FIXME:]
+1. Install and set up the [Add-on](https://github.com/puppetlabs/SplunkTAforPuppetEnterprise/)
+1. Install this App into Splunk
 
 ## Version history
 
 ### Version 2.0
 
 - Support for Multiple Versions of Puppet Enterprise
-- Rewrite of the Factor Pull, Customer Merge Dict Feature to Only Pull certain facts. 
+- Rewrite of the Factor Pull, Customer Merge Dict Feature to Only Pull certain facts.
 - Added PE Metrics for MQ
 - Added Compiliation Timing
 - Filter for Multiple Version of Puppet Enterprise
