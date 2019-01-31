@@ -1,2 +1,2 @@
-/local
-/metadata/local.meta
+*.pyc
+tmpdir/
