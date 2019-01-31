@@ -1,0 +1,103 @@
+<form>
+  <label>Puppet Enterprise - Facts</label>
+  <fieldset submitButton="false">
+    <input type="multiselect" token="certname" searchWhenChanged="true">
+      <label>Puppet Managed Hosts</label>
+      <choice value="*">ALL</choice>
+      <prefix>certname="</prefix>
+      <suffix>"</suffix>
+      <fieldForLabel>certname</fieldForLabel>
+      <fieldForValue>certname</fieldForValue>
+      <search>
+        <query>sourcetype="pe:factors"  | dedup certname | table certname</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+      <default>*</default>
+    </input>
+    <input type="multiselect" token="pe_server_url" searchWhenChanged="true">
+      <label>Puppet Enterprise Server</label>
+      <choice value="*">ALL</choice>
+      <default>*</default>
+      <prefix>pe_server_url_="</prefix>
+      <suffix>"</suffix>
+      <fieldForLabel>pe_server_url_</fieldForLabel>
+      <fieldForValue>pe_server_url_</fieldForValue>
+      <search>
+        <query>sourcetype="pe:factors"  |dedup pe_server_url_ | table pe_server_url_</query>
+        <earliest>-15m</earliest>
+        <latest>now</latest>
+      </search>
+      <delimiter> </delimiter>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <title>Hosts Managed by Puppet</title>
+        <search>
+          <query>sourcetype="pe:factors"  |dedup certname | timechart count(certname)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Number of Puppet Enterprise Masters</title>
+        <search>
+          <query>sourcetype="pe:factors"  |dedup certname | timechart distinct_count(pe_server_url_)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Number of Virtual Machines</title>
+        <search>
+          <query>sourcetype="pe:factors"  |dedup certname | timechart count(is_virtual)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>sourcetype="pe:factors" $certname$ $pe_server_url$ |dedup certname 
+            | eval api_end_epoch=strptime(expiration,"%m/%d/%y") 
+            | eval days_left=round((api_end_epoch-now())/86400,0)
+            | rename certname as Hosts 
+            | rename osfamily as "OS Family"
+            | rename pe_server_url_ as Facts
+            | rename expiration as "Token Generation Date" 
+            | rename clientversion as "Puppet Agent Version"
+            | rename uptime as "Uptime"
+            | rename architecture as "Architecture"
+            | rename _time as "Last Updated"
+            | rename days_left as "Token Expires"
+            | table Hosts Facts "OS Family" Architecture "Puppet Agent Version" Uptime "Last Updated" "Token Generation Date" "Token Expires"</query>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown target="_blank">
+          <link>https://$row.Facts$/#/inspect/node/$row.Hosts$/facts</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+</form>

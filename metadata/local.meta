@@ -1,0 +1,53 @@
+[props/pe%3Ametrics%3Apuppetdb]
+owner = admin
+version = 7.1.2
+modtime = 1536721338.482256000
+
+[props/pe%3Ametrics%3Apuppetserver]
+owner = admin
+version = 7.1.2
+modtime = 1536721361.632475000
+
+[props/pe%3Ametrics%3Aorchestrator]
+owner = admin
+version = 7.1.2
+modtime = 1536721374.520753000
+
+[views/home]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = nobody
+version = 7.1.2
+modtime = 1537468817.289193000
+
+[nav/default]
+version = 7.1.2
+modtime = 1537308583.385269000
+
+[views/puppet_enterprise__overview]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 7.1.2
+modtime = 1537468825.305803000
+
+[views/puppet_enterprise__facts]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 7.1.2
+modtime = 1537306497.317673000
+
+[views/puppet_enterprise__extended_details]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 7.1.2
+modtime = 1546968815.135647000
+
+[views/overview]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = admin
+version = 7.1.2
+modtime = 1537468812.923614000
