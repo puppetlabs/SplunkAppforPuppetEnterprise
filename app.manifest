@@ -5,11 +5,11 @@
     "id": {
       "group": null,
       "name": "SplunkAppForPuppetEnterprise",
-      "version": "2.0"
+      "version": "2.0.1"
     },
     "author": [
       {
-        "name": "Domnick Eger",
+        "name": "Puppet, Inc.",
         "email": null,
         "company": null
       }

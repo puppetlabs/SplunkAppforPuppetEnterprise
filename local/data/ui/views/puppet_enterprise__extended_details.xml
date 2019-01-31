@@ -1,0 +1,132 @@
+<form>
+  <label>Extended Details</label>
+  <description>Extended Details for Configuration Runs</description>
+  <fieldset submitButton="false">
+    <input type="time" token="Time" searchWhenChanged="true">
+      <label>Time</label>
+      <default>
+        <earliest>-60m@m</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" searchWhenChanged="true" token="pe_link">
+      <label>Puppet Enterprise Server</label>
+      <choice value="*">ALL</choice>
+      <default>*</default>
+      <prefix>source="</prefix>
+      <suffix>"</suffix>
+      <initialValue>*</initialValue>
+      <fieldForLabel>source</fieldForLabel>
+      <fieldForValue>source</fieldForValue>
+      <search>
+        <query>sourcetype="pe:events:extdetails" |dedup certname 
+            | table source | dedup source</query>
+        <earliest>0</earliest>
+        <latest></latest>
+      </search>
+    </input>
+    <input type="dropdown" token="node" searchWhenChanged="true">
+      <label>Node</label>
+      <choice value="*">ALL</choice>
+      <default>*</default>
+      <prefix>certname="</prefix>
+      <suffix>"</suffix>
+      <initialValue>*</initialValue>
+      <fieldForLabel>Node</fieldForLabel>
+      <fieldForValue>Node</fieldForValue>
+      <search>
+        <query>sourcetype="pe:*" sourcetype="pe:events:extdetails"
+| rename certname as Node
+| table Node | dedup Node</query>
+        <earliest>0</earliest>
+        <latest></latest>
+      </search>
+    </input>
+    <input type="dropdown" token="Env" searchWhenChanged="true">
+      <label>Environment</label>
+      <choice value="*">ALL</choice>
+      <default>*</default>
+      <prefix>environment="</prefix>
+      <suffix>"</suffix>
+      <initialValue>*</initialValue>
+      <fieldForLabel>Environment</fieldForLabel>
+      <fieldForValue>Environment</fieldForValue>
+      <search>
+        <query>sourcetype="pe:events:extdetails" $node$
+| rename environment as Environment
+| table Environment | dedup Environment</query>
+        <earliest>0</earliest>
+        <latest></latest>
+      </search>
+    </input>
+    <input type="dropdown" token="class" searchWhenChanged="true">
+      <label>Class</label>
+      <choice value="*">ALL</choice>
+      <default>*</default>
+      <prefix>containing_class="</prefix>
+      <suffix>"</suffix>
+      <initialValue>*</initialValue>
+      <fieldForLabel>containing_class</fieldForLabel>
+      <fieldForValue>containing_class</fieldForValue>
+      <search>
+        <query>sourcetype="pe:*" sourcetype="pe:events:extdetails" $node$ $Env$
+| table containing_class | dedup containing_class</query>
+        <earliest>0</earliest>
+        <latest></latest>
+      </search>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <chart>
+        <title>Average Compilation Times</title>
+        <search>
+          <query>sourcetype="pe:events:extdetails" $node$ $Env$ $class$ $pe_link$
+|  bin  _time  AS "TIME" span=1h
+| eval start_time=strptime(run_start_time,"%Y-%m-%dT%H:%M:%S.%3N%Z")
+| eval end_time=strptime(run_end_time,"%Y-%m-%dT%H:%M:%S.%3N%Z")
+| eval duration=(end_time - start_time)
+| rename certname as Host, containing_class as Class, configuration_version as Version, property as Property, resource_title as Title, resource_type as Type, report as Report,  start_time as "Start Time", end_time as "End time", duration as Duration 
+| stats avg(Duration) by _time | rename avg(Duration) as Duration</query>
+          <earliest>$Time.earliest$</earliest>
+          <latest>$Time.latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Configuration Changes with Compilation Times</title>
+      <table>
+        <title>(Click on Row to Link to Puppet Enterprise Reports)</title>
+        <search>
+          <query>sourcetype="pe:events:extdetails" $node$ $Env$ $class$ $pe_link$
+| eval start_time=strptime(run_start_time,"%Y-%m-%dT%H:%M:%S.%3N%Z")
+| eval end_time=strptime(run_end_time,"%Y-%m-%dT%H:%M:%S.%3N%Z")
+| eval duration=(end_time - start_time)
+| rename certname as Node, containing_class as Class, configuration_version as Version, property as Property, resource_title as Title, resource_type as Type, report as Report,  start_time as "Start Time", end_time as "End time", duration as Duration, environment as Environment, source as Link
+| table Node Class Version Property Title Type Report Duration Environment Link</query>
+          <earliest>$Time.earliest$</earliest>
+          <latest>$Time.latest$</latest>
+        </search>
+        <option name="count">50</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+        <drilldown target="_blank">
+          <link>https://$row.Link$/#/inspect/report/$row.Report$/events</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+</form>
