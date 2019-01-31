@@ -1,0 +1,209 @@
+<form>
+  <label>System Overview</label>
+  <fieldset submitButton="false">
+    <input type="dropdown" token="pe_link" searchWhenChanged="true">
+      <label>Puppet Enterprise Master</label>
+      <choice value="*">ALL</choice>
+      <default>*</default>
+      <prefix>source="</prefix>
+      <suffix>"</suffix>
+      <initialValue>*</initialValue>
+      <fieldForLabel>source</fieldForLabel>
+      <fieldForValue>source</fieldForValue>
+      <search>
+        <query>sourcetype="pe:status:overview" | table source | dedup source</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <title>Events Per Milliseconds</title>
+        <search>
+          <query>sourcetype="pe:metrics" $pe_link$ | stats avg(StdDev) by _time | rename avg(StdDev) as "Events Per Second"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>5 Minute Rate Average for Calls</title>
+        <search>
+          <query>sourcetype="pe:metrics" $pe_link$ | stats avg(FiveMinuteRate) by _time | rename avg(FiveMinuteRate) as "5 Minute Rate"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0.0000</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unitPosition">after</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Max Number of Calls</title>
+        <search>
+          <query>sourcetype="pe:metrics" $pe_link$ | stats max(Max) by _time | rename max(Max) as Max</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Puppet DB Write Status</title>
+        <search>
+          <query>sourcetype="pe:status:overview" $pe_link$ | fields host puppetdb-status.service_version puppetdb-status.status.maintenance_mode? puppetdb-status.status.queue_depth puppetdb-status.status.rbac_status puppetdb-status.status.read_db_up? puppetdb-status.status.write_db_up? puppetdb-status.status.sync_status.state puppetdb-status.service_version status-service.state | head 1 | stats latest(puppetdb-status.status.write_db_up?) | rename latest(puppetdb-status.status.write_db_up?) as PuppetDB_Write | eval PuppetDB_Write=if(PuppetDB_Write="true","Normal",status)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Puppet DB Read Status</title>
+        <search>
+          <query>sourcetype="pe:status:overview" $pe_link$ | fields host puppetdb-status.service_version puppetdb-status.status.maintenance_mode? puppetdb-status.status.queue_depth puppetdb-status.status.rbac_status puppetdb-status.status.read_db_up? puppetdb-status.status.write_db_up? puppetdb-status.status.sync_status.state puppetdb-status.service_version status-service.state | head 1 | stats latest(puppetdb-status.status.read_db_up?) | rename latest(puppetdb-status.status.read_db_up?) as PuppetDB_Read | eval PuppetDB_Read=if(PuppetDB_Read="true","Normal",status)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Puppet Sync State (Last 24 Hours)</title>
+        <search>
+          <query>sourcetype="pe:status:overview" $pe_link$  | fields host puppetdb-status.service_version puppetdb-status.status.maintenance_mode? puppetdb-status.status.queue_depth puppetdb-status.status.rbac_status puppetdb-status.status.read_db_up? puppetdb-status.status.write_db_up? puppetdb-status.status.sync_status.state puppetdb-status.service_version status-service.state| top limit=20 "puppetdb-status.status.sync_status.state"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+          <refresh>5m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Puppet Enterprise Queue Depth (Last 24 Hours)</title>
+        <search>
+          <query>sourcetype="pe:status:overview" $pe_link$ | fields host puppetdb-status.service_version puppetdb-status.status.maintenance_mode? puppetdb-status.status.queue_depth puppetdb-status.status.rbac_status puppetdb-status.status.read_db_up? puppetdb-status.status.write_db_up? puppetdb-status.status.sync_status.state puppetdb-status.service_version status-service.state | timechart span=1h sum(puppetdb-status.status.queue_depth) | rename sum(puppetdb-status.status.queue_depth) as "Queue Depth" | predict "Queue Depth" future_timespan=20</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+          <refresh>5m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-90</option>
+        <option name="charting.axisTitleX.text">24 Hour Time Period</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Queue Depth</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <title>Puppet SyncStatus</title>
+        <search>
+          <query>sourcetype="pe:status:overview" $pe_link$ | fields host puppetdb-status.service_version puppetdb-status.status.maintenance_mode? puppetdb-status.status.queue_depth puppetdb-status.status.rbac_status puppetdb-status.status.read_db_up? puppetdb-status.status.write_db_up? puppetdb-status.status.sync_status.state puppetdb-status.service_version status-service.state | head 1 | stats latest(puppetdb-status.status.sync_status.state) | rename latest(puppetdb-status.status.sync_status.state) as PuppetDB_SyncState</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Maintenance Mode</title>
+        <search>
+          <query>sourcetype="pe:status:overview" $pe_link$ | fields host puppetdb-status.service_version puppetdb-status.status.maintenance_mode? puppetdb-status.status.queue_depth puppetdb-status.status.rbac_status puppetdb-status.status.read_db_up? puppetdb-status.status.write_db_up? puppetdb-status.status.sync_status.state puppetdb-status.service_version status-service.state | head 1 | stats latest(puppetdb-status.status.maintenance_mode?) | rename latest(puppetdb-status.status.maintenance_mode?) as PuppetDB_Mainteance_Mode | eval PuppetDB_Mainteance_Mode=if(PuppetDB_Mainteance_Mode="false","Not in Mainteance",status)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Puppet Service Status</title>
+        <search>
+          <query>sourcetype="pe:status:overview" $pe_link$ | fields host puppetdb-status.service_version puppetdb-status.status.maintenance_mode? puppetdb-status.status.queue_depth puppetdb-status.status.rbac_status puppetdb-status.status.read_db_up? puppetdb-status.status.write_db_up? puppetdb-status.status.sync_status.state puppetdb-status.service_version status-service.state | head 1 | stats latest(status-service.state) | rename latest(status-service.state) as PuppetDB_ServiceState | eval PuppetDB_ServiceState=if(PuppetDB_ServiceState="running","Normal",status)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Puppet Enterprise RBAC Status</title>
+        <search>
+          <query>sourcetype="pe:status:overview" $pe_link$ | fields host puppetdb-status.service_version puppetdb-status.status.maintenance_mode? puppetdb-status.status.queue_depth puppetdb-status.status.rbac_status puppetdb-status.status.read_db_up? puppetdb-status.status.write_db_up? puppetdb-status.status.sync_status.state puppetdb-status.service_version status-service.state | head 1 | stats latest(puppetdb-status.status.rbac_status) | rename latest(puppetdb-status.status.rbac_status) as PuppetDB_RBAC_Status | eval PuppetDB_RBAC_Status=if(PuppetDB_RBAC_Status="running","Normal",status)</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+</form>
