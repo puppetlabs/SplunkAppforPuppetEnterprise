@@ -1,3 +1,8 @@
+# DEPRECATED
+
+*** Please note this App has been deprecated in favour of the TA Puppet Report Viewer which can be found [here in Github](https://github.com/puppetlabs/TA-puppet-report-viewer) and [here in SplunkBase](https://splunkbase.splunk.com/app/4413/) ***
+
+
 # Splunk App for Puppet Enterprise
 
 The Splunk App for Puppet Enterprise visualizes data from Puppet Enterprise.
